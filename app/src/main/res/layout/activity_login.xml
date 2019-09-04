@@ -62,7 +62,7 @@
         app:layout_constraintTop_toBottomOf="@+id/loginLoginBtn" />
 
     <Button
-        android:id="@+id/loginCreateUSerBtnClicked"
+        android:id="@+id/loginCreateUSerBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -82,7 +82,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/loginLoginBtn"
+        app:layout_constraintBottom_toTopOf="@+id/textView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent" />
