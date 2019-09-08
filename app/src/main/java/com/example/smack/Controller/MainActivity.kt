@@ -67,16 +67,16 @@ class MainActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
             IntentFilter(BROADCAST_USER_DATA_CHANGE)
         )
-        println("REGISTERED")
-        Toast.makeText(this, "Registering", Toast.LENGTH_LONG).show()
+        //println("REGISTERED")
+        //Toast.makeText(this, "Registering", Toast.LENGTH_LONG).show()
         socket.connect()
         super.onResume()
     }
 
     override fun onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
-        println("UNREGISTERED")
-        Toast.makeText(this, "Unregistering", Toast.LENGTH_LONG).show()
+        //LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        //println("UNREGISTERED")
+        //Toast.makeText(this, "Unregistering", Toast.LENGTH_LONG).show()
         super.onPause()
     }
 
