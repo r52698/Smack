@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -33,7 +34,9 @@ import com.example.smack.Utilities.SOCKET_URL
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_channel_dialog.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -41,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     val socket = IO.socket(SOCKET_URL)
 
     private lateinit var appBarConfiguration: AppBarConfiguration
+    lateinit var adapter: ArrayAdapter<Channel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +72,13 @@ class MainActivity : AppCompatActivity() {
 
         socket.connect()
         socket.on("channelCreated", onNewChannel)
+
+        adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            MessageService.channels
+        )
+        channel_list.adapter = adapter
     }
 
     override fun onResume() {
@@ -86,7 +97,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val userDataChangeReceiver = object: BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
+        override fun onReceive(context: Context, intent: Intent?) {
             // We reach here when user data has been changed, e.g. user logged in
             println("The braodcat has been received in MainActivity")
             if (AuthService.isLoggedIn) {
@@ -96,6 +107,15 @@ class MainActivity : AppCompatActivity() {
                 userImageNavHeader.setImageResource(resourceId)
                 userImageNavHeader.setBackgroundColor(UserDataService.returnAvatarColor(UserDataService.avatarColor))
                 loginBtnNavHeader.text = "Logout"
+
+                // Display all channels now
+                MessageService.getChannels(context) { getChannelsSuccess ->
+                    if (getChannelsSuccess) {
+                        adapter.notifyDataSetChanged()
+                    } else {
+
+                    }
+                }
             }
         }
     }
@@ -150,9 +170,10 @@ class MainActivity : AppCompatActivity() {
 
             val newChannel = Channel(channelName, channelDescription, channelId)
             MessageService.channels.add(newChannel)
-            println(newChannel.name)
-            println(newChannel.description)
-            println(newChannel.id)
+            adapter.notifyDataSetChanged()
+//            println(newChannel.name)
+//            println(newChannel.description)
+//            println(newChannel.id)
         }
     }
 
