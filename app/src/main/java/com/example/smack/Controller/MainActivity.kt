@@ -79,6 +79,10 @@ class MainActivity : AppCompatActivity() {
             MessageService.channels
         )
         channel_list.adapter = adapter
+
+        if (App.prefs.isLoggedIn) {
+            AuthService.findUserByEmail(this) {}
+        }
     }
 
     override fun onResume() {
@@ -100,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent?) {
             // We reach here when user data has been changed, e.g. user logged in
             println("The braodcat has been received in MainActivity")
-            if (AuthService.isLoggedIn) {
+            if (App.prefs.isLoggedIn) {
                 userNameNavHeader.text = UserDataService.name
                 userEmailNavHeader.text = UserDataService.email
                 val resourceId = resources.getIdentifier(UserDataService.avatarName, "drawable", packageName)
@@ -126,7 +130,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loginBtnNavClicked(view: View) {
-        if (AuthService.isLoggedIn) {
+        if (App.prefs.isLoggedIn) {
             // Logout
             UserDataService.logout()
             userNameNavHeader.text = ""
@@ -141,7 +145,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun addChannelClicked(view: View) {
-        if (AuthService.isLoggedIn) {
+        if (App.prefs.isLoggedIn) {
             val builder = AlertDialog.Builder(this)
             val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
             builder.setView(dialogView)
