@@ -1,24 +1,17 @@
 package com.example.smack.Services
 
-import android.content.Context
-import android.content.Intent
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.example.smack.Controller.App
 import com.example.smack.Model.Channel
-import com.example.smack.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.example.smack.Utilities.URL_GET_CHANNELS
-import com.example.smack.Utilities.URL_GET_USER
 import org.json.JSONException
 
 object MessageService {
     val channels = ArrayList<Channel>()
 
-    fun getChannels(context: Context, complete: (Boolean) -> Unit) {
+    fun getChannels(complete: (Boolean) -> Unit) {
 
         val channelsRequest = object : JsonArrayRequest(
             Method.GET,
