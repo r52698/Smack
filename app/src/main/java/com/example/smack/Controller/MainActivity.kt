@@ -30,6 +30,7 @@ import com.example.smack.Model.Message
 import com.example.smack.R
 import com.example.smack.Services.AuthService
 import com.example.smack.Services.MessageService
+import com.example.smack.Services.MessageService.messages
 import com.example.smack.Services.UserDataService
 import com.example.smack.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.example.smack.Utilities.SOCKET_URL
@@ -141,9 +142,13 @@ class MainActivity : AppCompatActivity() {
     fun updateWithChannel() {
         mainChannelName.text = "#${selectedChannel?.name}"
         // Download messages for channel
-        MessageService.getMessages { getMessagesSuccess ->
-            if (getMessagesSuccess) {
-
+        if (selectedChannel != null) {
+            MessageService.getMessages(selectedChannel!!.id) { getMessagesSuccess ->
+                if (getMessagesSuccess) {
+                    for (message in MessageService.messages) {
+                        println(message.message)
+                    }
+                }
             }
         }
     }

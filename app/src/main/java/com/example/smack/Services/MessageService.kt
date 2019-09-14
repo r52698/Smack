@@ -49,9 +49,10 @@ object MessageService {
         App.prefs.requestQueue.add(channelsRequest)
     }
 
-    fun getMessages(complete: (Boolean) -> Unit) {
+    fun getMessages(channelId: String, complete: (Boolean) -> Unit) {
+        clearMessages()
         val messagesRequest = object : JsonArrayRequest(
-            Method.GET, URL_GET_MESSAGES, null, Response.Listener { response ->
+            Method.GET, "$URL_GET_MESSAGES$channelId", null, Response.Listener { response ->
                 println(response)
                 try {
                     for (x in 0 until response.length()) {
@@ -87,5 +88,13 @@ object MessageService {
             }
         }
         App.prefs.requestQueue.add(messagesRequest)
+    }
+
+    fun clearMessages() {
+        messages.clear()
+    }
+
+    fun clearChannels() {
+        channels.clear()
     }
 }
