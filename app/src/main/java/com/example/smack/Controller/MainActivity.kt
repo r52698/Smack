@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -21,24 +19,22 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.smack.Adapters.MessageAdapter
 import com.example.smack.Model.Channel
 import com.example.smack.Model.Message
 import com.example.smack.R
 import com.example.smack.Services.AuthService
 import com.example.smack.Services.MessageService
-import com.example.smack.Services.MessageService.messages
 import com.example.smack.Services.UserDataService
 import com.example.smack.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.example.smack.Utilities.SOCKET_URL
 import io.socket.client.IO
-import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.add_channel_dialog.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 
@@ -47,8 +43,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     val socket = IO.socket(SOCKET_URL)
-    lateinit var adapter: ArrayAdapter<Channel>
+    lateinit var channelAdapter: ArrayAdapter<Channel>
     var selectedChannel : Channel? = null
+    lateinit var messagesAdapter: MessageAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,12 +75,7 @@ class MainActivity : AppCompatActivity() {
         socket.on("channelCreated", onNewChannel)
         socket.on("messageCreated", onNewMessage)
 
-        adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            MessageService.channels
-        )
-        channel_list.adapter = adapter
+        setUpAdapters()
 
         channel_list.setOnItemClickListener { _, _, i, _ ->
             selectedChannel = MessageService.channels[i]
@@ -94,6 +86,17 @@ class MainActivity : AppCompatActivity() {
         if (App.prefs.isLoggedIn) {
             AuthService.findUserByEmail(this) {}
         }
+    }
+
+    fun setUpAdapters() {
+        channelAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
+        channel_list.adapter = channelAdapter
+
+        messagesAdapter = MessageAdapter(this, MessageService.messages)
+        messageListView.adapter = messagesAdapter
+
+        val layoutManager = LinearLayoutManager(this)
+        messageListView.layoutManager = layoutManager
     }
 
     override fun onResume() {
@@ -114,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     private val userDataChangeReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
             // We reach here when user data has been changed, e.g. user logged in
-            println("The braodcat has been received in MainActivity")
+            println("The broadcast has been received in MainActivity")
             if (App.prefs.isLoggedIn) {
                 userNameNavHeader.text = UserDataService.name
                 userEmailNavHeader.text = UserDataService.email
@@ -128,7 +131,7 @@ class MainActivity : AppCompatActivity() {
                     if (getChannelsSuccess) {
                         if (MessageService.channels.count() > 0) {
                             selectedChannel = MessageService.channels[0]
-                            adapter.notifyDataSetChanged()
+                            channelAdapter.notifyDataSetChanged()
                             updateWithChannel()
                         }
                     } else {
@@ -145,8 +148,9 @@ class MainActivity : AppCompatActivity() {
         if (selectedChannel != null) {
             MessageService.getMessages(selectedChannel!!.id) { getMessagesSuccess ->
                 if (getMessagesSuccess) {
-                    for (message in MessageService.messages) {
-                        println(message.message)
+                    messagesAdapter.notifyDataSetChanged()
+                    if (messagesAdapter.itemCount > 0) {
+                        messageListView.smoothScrollToPosition(messagesAdapter.itemCount - 1)
                     }
                 }
             }
@@ -162,6 +166,8 @@ class MainActivity : AppCompatActivity() {
         if (App.prefs.isLoggedIn) {
             // Logout
             UserDataService.logout()
+            channelAdapter.notifyDataSetChanged()
+            messagesAdapter.notifyDataSetChanged()
             userNameNavHeader.text = ""
             userEmailNavHeader.text = ""
             userImageNavHeader.setImageResource(R.drawable.profiledefault)
@@ -204,7 +210,7 @@ class MainActivity : AppCompatActivity() {
 
                 val newChannel = Channel(channelName, channelDescription, channelId)
                 MessageService.channels.add(newChannel)
-                adapter.notifyDataSetChanged()
+                channelAdapter.notifyDataSetChanged()
 //            println(newChannel.name)
 //            println(newChannel.description)
 //            println(newChannel.id)
@@ -235,6 +241,8 @@ class MainActivity : AppCompatActivity() {
                     )
                     MessageService.messages.add(newMessage)
                     println(newMessage.message)
+                    messagesAdapter.notifyDataSetChanged()
+                    messageListView.smoothScrollToPosition(messagesAdapter.itemCount - 1)
                 }
             }
         }
